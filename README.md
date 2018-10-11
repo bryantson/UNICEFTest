@@ -14,6 +14,7 @@ AAAA BBB C A
 
 Additional user trips might be:
 u2: C A BB
+
 u3: CC BBB A C
 
 To calculate the mobility for each user user, we need to calculate all trips between areas, but not count "self-loops", or when the start and end towers are the same (i.e. A -> A).
@@ -23,7 +24,9 @@ First, we would simplify the trips to remove self-loops, finding their basic pat
 Next, we need to calculate all permutations of trips among these locations:
 
 Single-hop trips: A -> B, B -> C, C -> A
+
 Two-hop trips: A -> C, B -> A
+
 Three-hop trips: A -> A (this can be thrown out, as it is a self loop)
 
 # Pre-Requisite
@@ -44,8 +47,11 @@ However, the table structure above is just for testing purpose. The database cou
 Let's start with a simple example. In the example above, for one user, we have A B C A as the sequence. This is unidirectional, and we generate the permutation, while removing self-loop and duplicates.
 
 A -> B: 1
+
 B -> C: 1
+
 C -> A: 1
+
 A -> C: 1
 
 # Example 2
@@ -97,7 +103,7 @@ INSERT INTO  mobility(sim_id, created, event, site_id) values('0002', timestamp 
 INSERT INTO  mobility(sim_id, created, event, site_id) values('0002', timestamp '2018-10-11 01:00', 'sms', 'A');
 INSERT INTO  mobility(sim_id, created, event, site_id) values('0002', timestamp '2018-10-11 02:00', 'sms', 'B');
 ```
-You can also download from (./sample/sampleData.sql)
+You can also download from (https://github.com/bryantson/UNICEFTest/blob/master/sample/sampleData.sql)
 
 3. Write to bash shell script to be writable
 
