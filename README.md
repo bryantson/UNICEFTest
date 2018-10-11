@@ -1,17 +1,61 @@
-![Calculating Multi-Hop](./runningMinishift.jpg)
+![Calculating Multi-Hop](./media/unicef-logo.png)
 
-# Introduction
-Minikube, which is supposedly a simple way to run Kubernete for Docker, as advertised on Kubernete tutorial page, is very informative. You can read up about it here: Hello [Minikube Kubernetes](https://kubernetes.io/docs/tutorials/hello-minikube) 
+# Overview
 
-However, the documentation there is primarily written based on MacOS. While there are references where you can dig down deeper if you own Windows or different distributions of Linux, the instructions are not so clear. And many instructions like this [minikube/drivers.md at master · kubernetes/minikube · GitHub](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md) is mainly targetted for Debian/Ubuntu. This guide hopefully will make things easier on RHEL/Fedora/CentOS based operating system.
+The purpose of this project is introducing a bash file that calculates the multi-hop values given the database tble represents the mobility of each user.  While the problem was solved for PostgreSQL, note that the requirement is to adjust based on Oracle 11, so this needs to be adjusted in near future.
 
-> ASSUMPTION: I will assume that you already had installed Docker on your computer, and you are running RHEL/CentOS/Fedora based workstation.
+# Calculating Multi-Hop Mobility using SQL 
+What is multi-hop? According to wikpedia (see [Multi-Hopping](https://en.wikipedia.org/wiki/Multi-hop_routing), Multi-hop routing (or multihop routing) is a type of communication in radio networks in which network coverage area is larger than radio range of single nodes. Therefore, to reach some destination a node can use other nodes as relays. 
 
-# Example
+In our context, to better the understand multi-hop, imagine 3 users (u1, u2, and u3) and 3 cellphone towers that they might ping off of (A, B, and C).
 
-The activity sequences are:
-u1: AAAA BBB C A
+Over the course of a day, the first user may travel in such a way, that when using their phone, they ping the following towers:
+AAAA BBB C A
+
+Additional user trips might be:
 u2: C A BB
+u3: CC BBB A C
+
+To calculate the mobility for each user user, we need to calculate all trips between areas, but not count "self-loops", or when the start and end towers are the same (i.e. A -> A).
+
+First, we would simplify the trips to remove self-loops, finding their basic path in chronological order. For example, u1: A, B, C, A
+
+Next, we need to calculate all permutations of trips among these locations:
+
+Single-hop trips: A -> B, B -> C, C -> A
+Two-hop trips: A -> C, B -> A
+Three-hop trips: A -> A (this can be thrown out, as it is a self loop)
+
+# Pre-Requisite
+1. We used PostgreSQL installed for this excercise. But this has to be adjusted for  Oracle 11 and SQL 2008. 
+2. Environment to run bash script
+
+# Database Structure
+
+We want to create a databse table where the columns are
+sim_id : identifier of sim card, which is a primary key 
+timestamp : datetime dd-mm-yyy hh:mm:ss, where hh is given in 24 hour format
+event : the type of event that generated this row, can be sms, call, data, which is a varchar
+site_id : antenna identifier, which is a varchar
+
+However, the table structure above is just for testing purpose. The database could be hundreds of thousands to millions of lines, so the query should be efficient. It could be broken down into parts and use temporary tables, for example, so portions of the query can be run at a time to minimize chances of timing out. Variable names should be clear, so that this can be easily adapted to multiple different databases.
+
+# Example 1
+Let's start with a simple example. In the example above, for one user, we have A B C A as the sequence. This is unidirectional, and we generate the permutation, while removing self-loop and duplicates.
+
+A -> B: 1
+B -> C: 1
+C -> A: 1
+A -> C: 1
+
+# Example 2
+
+Let's look at slightly more complicated example. The activity sequences are:
+
+u1: AAAA BBB C A
+
+u2: C A BB
+
 u3: CC BBB A C
 
 And we can write as below:
@@ -20,12 +64,19 @@ And we can write as below:
 
 Calculting the hops result in:
 
-![Data Set You Should Return](./media/diagram2.png)
+The mobility results should be:
+AB: 2
+AC: 2
+BA: 2
+BC: 2
+CA: 3
+CB: 2
 
+# Steps
+1. Connect to PostgreSQL 
 
-# Pre-Requisite
-1. PostgreSQL
-2. 
+2. Create a sample database table using the SQL queries above or create something like it.
+
 
 ```sql
 -- CREATE Database Table to store the information --
@@ -46,83 +97,11 @@ INSERT INTO  mobility(sim_id, created, event, site_id) values('0002', timestamp 
 INSERT INTO  mobility(sim_id, created, event, site_id) values('0002', timestamp '2018-10-11 01:00', 'sms', 'A');
 INSERT INTO  mobility(sim_id, created, event, site_id) values('0002', timestamp '2018-10-11 02:00', 'sms', 'B');
 ```
+You can also download from (./sample/sampleData.sql)
 
-# Steps
-1. Create a directory below where you want to download the files. You will download two files: [minikube](https://github.com/kubernetes/minikube/releases) and [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-binary-using-curl). 
-2. Open a Terminal window and run the following command:
+3. Write to bash shell script to be writable
 
-```shell
-curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-```
-> Note that the version of minikube (e.g. minkube-linux-amd64) can change depending your computre's spec.
+4. Run the bash script and see the output
 
-3. chmod to make it writable.
-```shell
-chmod +x minikube
-```
+That is all! 
 
-3. Move the file to /usr/local/bin path. This is to run it as a command.
-
-```shell
-mv minikube /usr/local/bin
-```
-
-4. Download the kubectl next. Next steps will be pretty much similar as one you did for minikube.
-
-```shell
-curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
-```
-
-> You use the curl command to determine the latest version of kubernete.
-
-5. chmod to make kubectl writable.
-
-```shell
-chmod +x kubectl
-```
-
-6. Move kubectl to /usr/local/bin path. This is to run it as a command.
-
-```shell
-mv kubectl /usr/local/bin
-```
-
-7. Now, here is an important part. You need to run minishift start. To do so, you need to have a Hypervisor available. For me, I used KVM2, though Virtualbox is a possibility. This is where this guide reference can help: [Running Kubernetes Locally via Minikube Kubernetes](https://kubernetes.io/docs/setup/minikube). It is necessary to run this as an user instead of root so that the configuration is stored for the user instead of root.
-
-Run the following command.
-
-```shell
-minikube start --vm-driver=kvm2
-```
-
-It can take quite a while, so wait for it.
-
-8. It will download and start successfully. You use the following command to make sure that minikube started successfully.
-
-```shell
-cat ~/.kube/config
-```
-
-9. Execute the following command to run the minikube as the context.
-
-```shell
-kubectl config use-context minikube
-```
-
-10. Then, run the config file command again to check context minikube is there.
-
-```shell
-cat ~/.kube/config
-```
-
-11. Finally, run the following command to open a browser with Kubernete dashboard.
-
-```
-minikube dashboard
-```
-
-![Kubernete Dashboard](./dashboard.png)
-
-That is all! After this point, you can follow the rest of tutorials on minikube
-
- [Running Kubernetes Locally via Minikube Kubernetes](https://kubernetes.io/docs/setup/minikube).
