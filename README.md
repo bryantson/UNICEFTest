@@ -2,7 +2,7 @@
 
 # Overview
 
-The purpose of this project is introducing a bash file that calculates the multi-hop values given the database tble represents the mobility of each user.  While the problem was solved for PostgreSQL, note that the requirement is to adjust based on Oracle 11, so this needs to be adjusted in near future.
+The purpose of this project is introducing a SQL script that calculates the multi-hop values given the database tble represents the mobility of each user.  While the problem was solved for PostgreSQL, note that the requirement is to adjust based on Oracle 11, so this needs to be adjusted in near future.
 
 # Calculating Multi-Hop Mobility using SQL 
 What is multi-hop? According to wikpedia (see [Multi-Hopping](https://en.wikipedia.org/wiki/Multi-hop_routing), Multi-hop routing (or multihop routing) is a type of communication in radio networks in which network coverage area is larger than radio range of single nodes. Therefore, to reach some destination a node can use other nodes as relays. 
@@ -120,9 +120,8 @@ INSERT INTO  mobility(sim_id, created, event, site_id) values('0002', timestamp 
 ```
 You can also download from (https://github.com/bryantson/UNICEFTest/blob/master/sample/sampleData.sql)
 
-3. Write to bash shell script to be writable
 
-4. Run the bash script and see the output
+3. Run the SQL script and see the output
 
 ```sql
 SELECT site1, site2, COUNT(*) FROM (
