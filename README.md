@@ -124,11 +124,11 @@ You can also download from sampleData.sql
 3. Run the SQL script and see the output
 
 ```sql
-SELEFT site1, site2, count(*) num FROM (
+SELECT site1, site2, count(*) num FROM (
 	SELECT sim_id, site1, site2 FROM (
 		SELECT m3.sim_id, m4.site_id site1, m5.site_id site2, m3.created1, m3.created2 FROM (
 				SELECT m1.sim_id, m1.created created1, m2.created created2 FROM mobility m1 
-				INNSER JOIN mobility m2 on m1.sim_id = m2.sim_id AND m1.created < m2.created 
+				INNER JOIN mobility m2 on m1.sim_id = m2.sim_id AND m1.created < m2.created 
 					GROUP BY m1.sim_id, m1.created, m2.created ORDER BY m1.sim_id, m1.created
 			) m3 
 			INNER JOIN mobility m4 ON m3.sim_id = m4.sim_id AND m3.created1 = m4.created 
@@ -141,6 +141,9 @@ SELEFT site1, site2, count(*) num FROM (
 ;
 
 ```
+
+![Result for sample](./media/result.png)
+
 
 You can also see from calculateMobileHop.sql
 
