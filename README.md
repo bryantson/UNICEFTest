@@ -13,21 +13,30 @@ Over the course of a day, the first user may travel in such a way, that when usi
 AAAA BBB C A
 
 Additional user trips might be:
+
 u2: C A BB
 
 u3: CC BBB A C
 
 To calculate the mobility for each user user, we need to calculate all trips between areas, but not count "self-loops", or when the start and end towers are the same (i.e. A -> A).
 
-First, we would simplify the trips to remove self-loops, finding their basic path in chronological order. For example, u1: A, B, C, A
+First, we would simplify the trips to remove self-loops, finding their basic path in chronological order. 
+
+For example, u1: A, B, C, A
 
 Next, we need to calculate all permutations of trips among these locations:
 
-Single-hop trips: A -> B, B -> C, C -> A
+Single-hop trips: 
 
-Two-hop trips: A -> C, B -> A
+A -> B, B -> C, C -> A
 
-Three-hop trips: A -> A (this can be thrown out, as it is a self loop)
+Two-hop trips: 
+
+A -> C, B -> A
+
+Three-hop trips:
+
+ A -> A (this can be thrown out, as it is a self loop)
 
 # Pre-Requisite
 1. We used PostgreSQL installed for this excercise. But this has to be adjusted for  Oracle 11 and SQL 2008. 
@@ -44,7 +53,7 @@ site_id : antenna identifier, which is a varchar
 However, the table structure above is just for testing purpose. The database could be hundreds of thousands to millions of lines, so the query should be efficient. It could be broken down into parts and use temporary tables, for example, so portions of the query can be run at a time to minimize chances of timing out. Variable names should be clear, so that this can be easily adapted to multiple different databases.
 
 # Example 1
-Let's start with a simple example. In the example above, for one user, we have A B C A as the sequence. This is unidirectional, and we generate the permutation, while removing self-loop and duplicates.
+Let's start with a simple example. In the example above, where the data for one user is u1: A, B, C, A, we have A B C A as the sequence. This is unidirectional, and we generate the permutation, while removing self-loop and duplicates.
 
 A -> B: 1
 
