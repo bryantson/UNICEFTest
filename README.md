@@ -80,17 +80,23 @@ And we can write as below:
 Calculting the hops result in:
 
 The mobility results should be:
+
 AB: 2
+
 AC: 2
+
 BA: 2
+
 BC: 2
+
 CA: 3
+
 CB: 2
 
 # Steps
 1. Connect to PostgreSQL 
 
-2. Create a sample database table using the SQL queries above or create something like it.
+2. Create a sample database table using the SQL queries above or create something like it. And insert the sample data.
 
 
 ```sql
